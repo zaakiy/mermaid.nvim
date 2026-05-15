@@ -60,7 +60,7 @@ describe("mermaid format — edge cases v2", function()
         "A-->|'arrow text with -->'|B",
       })
       assert.are.same("flowchart TD", result[1])
-      assert.are.same("  A --> |'arrow text with -->'| B", result[2])
+      assert.are.same("  A --> |'arrow text with -->'|B", result[2])
     end)
   end)
 
@@ -168,6 +168,18 @@ describe("mermaid format — edge cases v2", function()
       -- the formatter doesn't distinguish structural `:` (label separator)
       -- from content `:` inside the message text.
       assert.are.same("  Alice ->> Bob : Hello : How are you?", result[2])
+    end)
+  end)
+
+  describe("pipe-delimited labels", function()
+    it("pads the first pipe but not the second (known limitation)", function()
+      local result = format_text({
+        "flowchart TD",
+        "A-->|label|B",
+      })
+      assert.are.same("flowchart TD", result[1])
+      -- First | gets padded via the ER cardinality pattern, second | doesn't
+      assert.are.same("  A --> |label|B", result[2])
     end)
   end)
 

@@ -27,8 +27,8 @@ local function parse_mmdc_error(stderr_data)
     { pattern = "[Ss]yntax error in line (%d+)", severity = vim.diagnostic.severity.ERROR },
     -- "Syntax error on line 8:"
     { pattern = "[Ss]yntax error on line (%d+)", severity = vim.diagnostic.severity.ERROR },
-    -- "Could not parse diagram: error at line 15"
-    { pattern = "[Cc]ould not parse.->.-error at line (%d+)", severity = vim.diagnostic.severity.ERROR },
+    -- "Could not parse diagram: error at line 15, unexpected symbol"
+    { pattern = "[Cc]ould not parse.-error at line (%d+)", severity = vim.diagnostic.severity.ERROR },
     -- "Warning: something on line 23" (some mmdc configs output warnings)
     { pattern = "[Ww]arning.-line (%d+)", severity = vim.diagnostic.severity.WARN },
   }

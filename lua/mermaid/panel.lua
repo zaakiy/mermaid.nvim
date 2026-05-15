@@ -83,12 +83,13 @@ function M.open(url)
 
   vim.api.nvim_win_set_option(win, "winhl", "Normal:NormalFloat,FloatBorder:FloatBorder")
   vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
+
+  refresh()
+
   vim.api.nvim_buf_set_option(buf, "modifiable", false)
   vim.api.nvim_buf_set_keymap(buf, "n", "o", ":MermaidPreview<CR>", { noremap = true, silent = true })
   vim.api.nvim_buf_set_keymap(buf, "n", "c", ":call MermaidCopyURL()<CR>", { noremap = true, silent = true })
   vim.api.nvim_buf_set_keymap(buf, "n", "q", ":lua require('mermaid.panel').close()<CR>", { noremap = true, silent = true })
-
-  refresh()
 end
 
 --- Update panel content (called periodically or on state changes)

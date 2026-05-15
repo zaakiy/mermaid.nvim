@@ -151,9 +151,9 @@ end
 
 local BLOCK_START_KEYWORDS = {
   "subgraph", "graph", "flowchart", "sequenceDiagram", "classDiagram",
-  "stateDiagram", "stateDiagram%-v2", "erDiagram", "gantt", "pie", "journey",
-  "requirementDiagram", "gitGraph", "mindmap", "timeline", "xychart%%-beta",
-  "sankey%%-beta", "block", "info",
+  "stateDiagram", "stateDiagram-v2", "erDiagram", "gantt", "pie", "journey",
+  "requirementDiagram", "gitGraph", "mindmap", "timeline", "xychart-beta",
+  "sankey-beta", "block", "info",
   "loop", "rect", "opt", "alt", "par", "critical", "group", "parallel",
 }
 
@@ -171,7 +171,8 @@ local function is_start_block(line)
   if line:match("{$") or line:match("%%{$") then return true end
 
   for _, kw in ipairs(BLOCK_START_KEYWORDS) do
-    if line == kw or line:match("^" .. kw .. "%s") or line:match("^" .. kw .. ":") then
+    local escaped = vim.pesc(kw)
+    if line == kw or line:match("^" .. escaped .. "%s") or line:match("^" .. escaped .. ":") then
       return true
     end
   end
@@ -261,7 +262,10 @@ function M.format()
     if trimmed == "" then
       table.insert(formatted_lines, "")
     elseif trimmed:match("^" .. vim.pesc(SKIP_MARKER)) or trimmed:match("^" .. vim.pesc(SKIP_MARKER:lower())) then
-      -- Skip marker: keep original line as-is
+      -- Skip marker: keep original line as-is (no indent, no padding)
+      table.insert(formatted_lines, line)
+    elseif line:match(vim.pesc(SKIP_MARKER)) or line:match(vim.pesc(SKIP_MARKER:lower())) then
+      -- Inline skip marker: keep original line as-is
       table.insert(formatted_lines, line)
     else
       -- Step 1: Mask comments and strings

@@ -1,7 +1,7 @@
 local stub = require("luassert.stub")
 
 describe("mermaid formatted", function()
-  
+
   -- Mock vim.notify to avoid noise
   local original_notify = vim.notify
   before_each(function()
@@ -22,17 +22,17 @@ describe("mermaid formatted", function()
       "end",
       "C-.->D"
     }
-    
+
     -- Setup buffer
     local buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, input)
     vim.api.nvim_set_current_buf(buf)
-    
+
     -- Run format
     require("mermaid.format").format()
-    
+
     local content = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    
+
     assert.are.same("flowchart TD", content[1])
     assert.are.same("  subgraph One", content[2])
     assert.are.same("    A --> B", content[3])
@@ -46,14 +46,14 @@ describe("mermaid formatted", function()
       "CUSTOMER ||--o{ ORDER : places",
       "ORDER ||--|{ LINE-ITEM : contains"
     }
-    
+
     local buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, input)
     vim.api.nvim_set_current_buf(buf)
-    
+
     require("mermaid.format").format()
     local content = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    
+
     assert.are.same("erDiagram", content[1])
     -- Expect spaces around tokens
     assert.are.same("  CUSTOMER ||--o{ ORDER : places", content[2])
@@ -70,31 +70,23 @@ describe("mermaid formatted", function()
       "Bob-->>Alice: Good",
       "end"
     }
-    
+
     local buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, input)
     vim.api.nvim_set_current_buf(buf)
-    
+
     require("mermaid.format").format()
     local content = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    
+
     assert.are.same("sequenceDiagram", content[1])
     assert.are.same("  Alice ->> Bob : Hello", content[2]) -- checking colon pad
     assert.are.same("  alt is sick", content[3])
     assert.are.same("    Bob -->> Alice : Not well", content[4])
-    assert.are.same("  else is well", content[5]) -- dedented to level 1 (inside seq which is 1? No seq is 0->1. alt is 1->2. else at 1.)
-    -- Wait: sequenceDiagram is Start Block? Yes (lev 0->1).
-    -- Alice (1).
-    -- alt (1->2). (prints at 1).
-    -- Bob (2).
-    -- else (prints at 1).
-    -- Bob (2).
-    -- end (prints at 1, dedents 2->1).
-    
+    assert.are.same("  else is well", content[5])
     assert.are.same("    Bob -->> Alice : Good", content[6])
     assert.are.same("  end", content[7])
   end)
-  
+
   it("formats Gantt chart", function()
      local input = {
          "gantt",
@@ -104,14 +96,14 @@ describe("mermaid formatted", function()
          "section Section B",
          "Task 2 : 20d"
      }
-     
+
      local buf = vim.api.nvim_create_buf(false, true)
      vim.api.nvim_buf_set_lines(buf, 0, -1, false, input)
      vim.api.nvim_set_current_buf(buf)
-     
+
      require("mermaid.format").format()
      local content = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-     
+
      assert.are.same("gantt", content[1])
      assert.are.same("  title My Project", content[2])
      assert.are.same("  section Section A", content[3])
