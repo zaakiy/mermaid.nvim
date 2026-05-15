@@ -18,20 +18,20 @@ local uv = vim.loop
 
 --- Detect what terminal rendering capability is available
 function M.detect_capability()
-  local env = vim.fn.environ
+  local env = vim.fn.environ()
 
   -- Kitty protocol (most reliable)
-  if vim.fn.executable("kitty") == 1 and env("KITTY_WINDOW_ID") ~= vim.NIL then
+  if vim.fn.executable("kitty") == 1 and env["KITTY_WINDOW_ID"] ~= vim.NIL then
     return "kitty"
   end
 
   -- iTerm2
-  if env("TERM_PROGRAM") == "iTerm.app" then
+  if env["TERM_PROGRAM"] == "iTerm.app" then
     return "iterm2"
   end
 
   -- Sixel
-  local term = env("TERM") or ""
+  local term = env["TERM"] or ""
   if term:match("sixel") then
     return "sixel"
   end

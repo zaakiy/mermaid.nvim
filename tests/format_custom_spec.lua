@@ -6,6 +6,9 @@ describe("mermaid formatted", function()
   local original_notify = vim.notify
   before_each(function()
     vim.notify = function() end
+    require("mermaid").setup({ format = { shift_width = 2 } })
+    vim.o.expandtab = true
+    vim.o.shiftwidth = 2
   end)
   after_each(function()
     vim.notify = original_notify

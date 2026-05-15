@@ -59,8 +59,12 @@ function M.open(url)
   M.close()
 
   -- Calculate position (top-right corner)
-  local ui = vim.api.nvim_list_uis()[1]
-  if not ui then return end
+  local uis = vim.api.nvim_list_uis()
+  local ui = uis and uis[1]
+  if not ui then
+    -- Headless mode or no UI: silently skip
+    return
+  end
   local row = 1
   local col = math.max(0, ui.width - WIN_WIDTH - 1)
 
