@@ -41,8 +41,33 @@ jobs:
           nvim --headless -u tests/minimal_init.lua \
             -c "PlenaryBustedDirectory tests/ { minimal_init = 'tests/minimal_init.lua' }"
 
+  auto-tag:
+    name: Auto Tag
+    if: github.ref == 'refs/heads/main'
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump version and push tag
+        run: |
+          LATEST=$(git tag --sort=-v:refname | grep '^v' | head -1 || echo "v0.0.0")
+          # Extract major.minor.patch and bump patch
+          RAW=$(echo "$LATEST" | sed 's/^v//')
+          MAJOR=$(echo "$RAW" | cut -d. -f1)
+          MINOR=$(echo "$RAW" | cut -d. -f2)
+          PATCH=$(echo "$RAW" | cut -d. -f3)
+          NEXT="v${MAJOR}.${MINOR}.$((PATCH + 1))"
+          echo "Latest: $LATEST → Next: $NEXT"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "$NEXT"
+          git push origin "$NEXT"
+
   release:
-    name: Release (tag push only)
+    name: Release
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [lint, test]
     runs-on: ubuntu-latest
