@@ -142,6 +142,11 @@ local function pad_mermaid_tokens(line)
 
   -- Cleanup double/triple spaces
   line = line:gsub("%s+", " ")
+
+  -- Remove space before colon when it follows a word character
+  -- (sequence diagram labels: `Bob: Hello`, not `Bob : Hello`)
+  line = line:gsub("(%w) :", "%1:")
+
   return line
 end
 
