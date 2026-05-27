@@ -320,12 +320,23 @@ function M.stop_server()
   end
 end
 
---- Get the effective theme mode, considering theme config overrides.
---- When theme == "default" (mermaid's light theme), force light mode.
+--- Get the effective theme mode (light/dark) for HTML preview.
+--- Derived from the theme name itself, NOT Neovim's background.
+--- This ensures the page CSS matches the chosen renderer theme.
 function M.get_effective_theme_mode()
   local theme = require("mermaid").config.preview.theme
-  if theme == "default" then return "light" end
-  return M.theme_mode
+  -- Explicit dark themes (mermaid.js + beautiful-mermaid)
+  if theme:match("dark") and not theme:match("light") then
+    return "dark"
+  end
+  if theme:match("night") and not theme:match("light") then
+    return "dark"
+  end
+  if theme:match("storm") then return "dark" end
+  if theme:match("dracula") then return "dark" end
+  if theme:match("mocha") then return "dark" end
+  if theme == "nord" then return "dark" end
+  return "light"
 end
 
 --- Build the HTML template with injected renderer scripts
