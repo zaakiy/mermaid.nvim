@@ -12,4 +12,5 @@ end
 ensure_plenary()
 
 require("mermaid").setup({})
+require("mermaid.server")._test_mode = true  -- Skip idle monitor in tests
 require("plenary.busted") -- Ensure plenary is loaded

@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant User
+    participant Neovim
+    participant Preview
+
+    User->>Neovim: Open .mmd file
+    Neovim->>Neovim: Syntax highlighting 🎨
+    User->>Neovim: :MermaidPreview
+    Neovim->>Preview: Start Lua HTTP server
+    Preview-->>User: Open browser at localhost
+    Note over User,Preview: Real-time SSE updates
+    User->>Neovim: Edit diagram
+    Neovim-->>Preview: Broadcast content
+    Preview-->>User: Diagram updates instantly

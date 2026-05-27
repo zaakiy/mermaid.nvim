@@ -1,0 +1,31 @@
+classDiagram
+    class NeovimPlugin {
+        +string name
+        +string version
+        +setup(config)
+        +format()
+        +preview()
+    }
+    class PreviewServer {
+        -int port
+        -table clients
+        +start_server()
+        +stop_server()
+        +broadcast(content)
+    }
+    class Formatter {
+        -int shift_width
+        +format()
+        -pad_tokens()
+    }
+    class LintEngine {
+        +lint()
+        -do_lint_async()
+        +parse_error()
+    }
+
+    NeovimPlugin *-- PreviewServer
+    NeovimPlugin *-- Formatter
+    NeovimPlugin *-- LintEngine
+    PreviewServer --> Formatter : uses
+    Formatter --> LintEngine : notifies

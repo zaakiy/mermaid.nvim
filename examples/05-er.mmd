@@ -1,0 +1,20 @@
+erDiagram
+    PLUGIN ||--o{ FEATURE : "has many"
+    PLUGIN {
+        string name
+        string version
+        string license
+    }
+    FEATURE ||--|| FORMAT : "one to one"
+    FEATURE ||--|| PREVIEW : "one to one"
+    FEATURE ||--o{ RENDERER : "supports"
+    PREVIEW ||--|| SERVER : "runs on"
+    SERVER ||--|{ CLIENT : "streams to"
+    CLIENT {
+        string browser
+        string status
+    }
+    RENDERER {
+        string name
+        string theme
+    }

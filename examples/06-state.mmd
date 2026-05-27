@@ -1,0 +1,20 @@
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Editing: User types
+    Editing --> Formatting: :MermaidFormat
+    Formatting --> Preview: :MermaidPreview
+    Preview --> Editing: Edit continues
+
+    state Editing {
+        [*] --> Modified
+        Modified --> Saved: :w
+        Saved --> Modified: Change
+    }
+
+    state Preview {
+        [*] --> SSE_Connected
+        SSE_Connected --> Rendering: Content update
+        Rendering --> SSE_Connected: Render complete
+        SSE_Connected --> Disconnected: Server stop
+        Disconnected --> [*]
+    }

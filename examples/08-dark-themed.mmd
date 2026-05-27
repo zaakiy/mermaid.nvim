@@ -1,0 +1,18 @@
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#89b4fa', 'lineColor': '#a6e3a1'}}}%%
+flowchart LR
+    subgraph Config
+        direction TB
+        A[shift_width] --> B[4]
+        C[renderer] --> D[mermaid.js]
+        E[theme] --> F[default]
+    end
+
+    subgraph Commands
+        direction TB
+        G[:MermaidPreview] --> H[🖥️ Browser]
+        I[:MermaidFormat] --> J[✏️ Format]
+        K[:MermaidRender] --> L[📟 Terminal]
+    end
+
+    Config --> Commands
+    Commands --> M[🎉 Working!]

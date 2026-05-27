@@ -1,30 +1,27 @@
 # mermaid.nvim 🧜
 
-A feature-rich Neovim plugin for working with [Mermaid](https://mermaid.js.org/) diagrams.
+> A feature-rich Neovim plugin for working with [Mermaid](https://mermaid.js.org/) diagrams — preview, format, lint, and render inline in your terminal.
 
-![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
+![License](https://img.shields.io/github/license/kevalin/mermaid.nvim)
+![Neovim](https://img.shields.io/badge/Neovim-%3E%3D0.9.5-green)
+![Test](https://github.com/kevalin/mermaid.nvim/actions/workflows/ci.yml/badge.svg)
+
+---
 
 ## ✨ Features
 
-- **Syntax Highlighting**: Relies on [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) (official support).
-- **Live Preview**:
-  - **Multiple Renderers**: Choose between standard `mermaid.js` and the aesthetic-focused `beautiful-mermaid`.
-  - **Real-time**: Diagram updates instantly as you type.
-  - **Interactive**: Pan and Zoom support (with `svg-pan-zoom`).
-  - **Toolbar**: Custom controls for Zoom, Reset, **Copy Image (PNG)**, and Downloading SVG.
-  - **Zero-config**: Built-in Lua HTTP server (no external node/python server needed).
-- **Auto-Formatting**:
-  - Built-in indentation engine (no `prettier` dependency required).
-  - Smart handling of blocks, diagrams, and directives.
-- **Diagnostics**:
-  - Integration with `vim.diagnostic` to show syntax errors (requires `mermaid-cli`).
+| Feature | Description | Dependencies |
+|---------|-------------|-------------|
+| **Live Preview** | Real-time browser preview via built-in Lua HTTP server + SSE | None |
+| **Dual Renderers** | Standard `mermaid.js` or aesthetic `beautiful-mermaid` | None |
+| **Floating Panel** | In-editor control panel with URL, status, and quick actions | None |
+| **Inline Render** | Render diagrams directly in Kitty/chafa-capable terminals | `mmdc` + chafa/Kitty |
+| **Auto-Format** | Built-in Lua formatter for indentation and token spacing | None |
+| **Diagnostics** | Lint with `vim.diagnostic` via mermaid-cli | `mmdc` (optional) |
+| **Dark Mode** | Auto-detects Neovim `background` setting, live-syncs preview | None |
+| **Toolbar** | Zoom, pan, copy PNG, download SVG in browser preview | None |
 
-## ⚡ Requirements
-
-- **Neovim** >= 0.8.0
-- **nvim-treesitter**: For syntax highlighting.
-- **mermaid-cli** (Optional): Only needed for diagnostics (error checking).
-  - `npm install -g @mermaid-js/mermaid-cli`
+---
 
 ## 📦 Installation
 
@@ -37,42 +34,93 @@ return {
     config = function()
         require("mermaid").setup()
 
-        -- Install the tree-sitter parser manually if TSInstall fails
+        -- Install the Tree-sitter parser:
         -- :TSInstall mermaid
     end,
 }
 ```
 
+> **Note:** Requires Tree-sitter for syntax highlighting. Install with `:TSInstall mermaid`.
+
+---
+
 ## ⚙️ Configuration
 
-The default configuration works out of the box. You can customize standard options:
+All options with defaults:
 
 ```lua
-require('mermaid').setup({
+require("mermaid").setup({
     format = {
-        shift_width = 4, -- Indentation size
+        shift_width = 4,           -- Indentation size (spaces)
     },
     lint = {
-        enabled = true,  -- Enable usage of mmdc for checking errors
-        command = "mmdc", -- Path to mermaid-cli executable
+        enabled = true,            -- Enable diagnostics via mmdc
+        command = "mmdc",           -- Path to mermaid-cli executable
     },
     preview = {
-        renderer = "mermaid.js", -- "mermaid.js" (default) or "beautiful-mermaid"
-        theme = "default",       -- Theme name (renderer-specific)
-    }
+        renderer = "mermaid.js",   -- "mermaid.js" or "beautiful-mermaid"
+        theme = "default",          -- Theme name (renderer-specific)
+    },
 })
 ```
 
-## 🎨 Renderers
+### Renderer Themes
 
-| Renderer | Description |
-| :--- | :--- |
-| `mermaid.js` | Official Mermaid.js renderer. Most reliable, supports all standard syntax including icons and edge labels. |
-| `beautiful-mermaid` | Lightweight, aesthetic-focused renderer. Uses [beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) for premium-styled SVGs. |
+**`mermaid.js`** (official): Uses Mermaid's built-in themes — `default`, `dark`, `forest`, `neutral`.
 
-### Renderer Comparison
+**`beautiful-mermaid`** (aesthetic):
 
-Original mermaid code:
+| Palette | Light | Dark |
+|---------|-------|------|
+| Zinc | `zinc-light` ✅ | `zinc-dark` ✅ |
+| Tokyo Night | `tokyo-night-light` | `tokyo-night-storm`, `tokyo-night` |
+| Catppuccin | `catppuccin-latte` | `catppuccin-mocha` ✅ |
+| Nord | `nord-light` | `nord` |
+| Dracula | — | `dracula` ✅ |
+| GitHub | `github-light` | `github-dark` |
+| Solarized | `solarized-light` | `solarized-dark` |
+| One Dark | — | `one-dark` |
+
+> ✅ = recommended starters
+
+---
+
+## 🚀 Commands
+
+| Command | Description |
+|---------|-------------|
+| `:MermaidPreview` | Open live browser preview (auto-updates on edit) |
+| `:MermaidPreviewStop` | Stop the preview server |
+| `:MermaidFormat` | Auto-format current buffer |
+| `:MermaidRender` | Render inline in Kitty/chafa terminals |
+| `:MermaidCopyURL` | Copy preview URL to clipboard |
+
+### Suggested Keybindings
+
+```lua
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "mermaid",
+    callback = function()
+        local buf = vim.api.nvim_get_current_buf()
+        vim.keymap.set("n", "<leader>mp", "<cmd>MermaidPreview<CR>",
+            { buffer = buf, desc = "Mermaid Preview" })
+        vim.keymap.set("n", "<leader>mf", "<cmd>MermaidFormat<CR>",
+            { buffer = buf, desc = "Mermaid Format" })
+        vim.keymap.set("n", "<leader>mr", "<cmd>MermaidRender<CR>",
+            { buffer = buf, desc = "Mermaid Render" })
+        vim.keymap.set("n", "<leader>mc", "<cmd>MermaidCopyURL<CR>",
+            { buffer = buf, desc = "Mermaid Copy URL" })
+        vim.keymap.set("n", "<leader>mx", "<cmd>MermaidPreviewStop<CR>",
+            { buffer = buf, desc = "Mermaid Stop Preview" })
+    end,
+})
+```
+
+---
+
+## 🖼️ Renderer Comparison
+
+**Input:**
 ```
 flowchart TD
   A(Start) --> B{Is it sunny?}
@@ -82,81 +130,125 @@ flowchart TD
   D --> E
 ```
 
-#### beautiful-mermaid (Modern/Premium)
-Designed for high-quality, modern-looking diagrams.
+### beautiful-mermaid (Premium aesthetic)
+Designed for modern, high-quality diagram rendering.
+
 ![beautiful-mermaid example](media/preview-beautiful.png)
 
-> [!NOTE]
-> `beautiful-mermaid` uses a simplified parser. For complex diagrams involving **Font Awesome icons** or **edge labels** (e.g., `A --> |label| B`), please use the official `mermaid.js` renderer.
+> **[!NOTE]**
+> `beautiful-mermaid` uses a simplified parser. Complex diagrams with **Font Awesome icons** or **edge labels** (`A --> |label| B`) should use `mermaid.js`.
 
-#### mermaid.js (Standard/Full-featured)
-Supports the full Mermaid specification.
+### mermaid.js (Full specification)
+Supports the complete Mermaid feature set.
+
 ![mermaid.js example](media/preview-mermaid.png)
 
-### Supported Themes (beautiful-mermaid)
-- `zinc-light` (default), `zinc-dark`
-- `tokyo-night`, `tokyo-night-storm`, `tokyo-night-light`
-- `catppuccin-mocha`, `catppuccin-latte`
-- `nord`, `nord-light`
-- `dracula`
-- `github-light`, `github-dark`
-- `solarized-light`, `solarized-dark`
-- `one-dark`
+---
 
-## 🚀 Usage
+## 🧑‍💻 Terminal Inline Rendering
 
-### Commands
+`mermaid.nvim` can render diagrams directly in your terminal:
 
-| Command           | Description                                                       |
-| :---------------- | :---------------------------------------------------------------- |
-| `:MermaidPreview` | Open a Live Preview in your browser (localhost). Updates on edit. |
-| `:MermaidFormat`  | Auto-format the current buffer (indentation).                     |
-
-### Keybindings
-
-You can set up your own keybindings in your `init.lua` or `ftplugin/mermaid.lua`:
-
-```lua
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "mermaid",
-    callback = function()
-        local buf = vim.api.nvim_get_current_buf()
-        vim.keymap.set("n", "<leader>mp", "<cmd>MermaidPreview<CR>", { buffer = buf, desc = "Mermaid Preview" })
-        vim.keymap.set("n", "<leader>mf", "<cmd>MermaidFormat<CR>", { buffer = buf, desc = "Mermaid Format" })
-    end,
-})
+```
+kitty protocol  ─── ✅ Full-color, scalable SVG rendering
+chafa           ─── ✅ ASCII/ANSI art (works in any terminal)
+sixel           ─── ⏳ Planned
+iTerm2          ─── ⏳ Planned
 ```
 
-## 🛠️ Tree-sitter Setup
+Run `:MermaidRender` to try it. The plugin auto-detects your terminal's capabilities.
 
-If you don't see syntax highlighting, ensure the parser is installed:
+---
 
-```vim
-:TSInstall mermaid
-```
+## 📂 Filetype Detection
 
-## 📸 Preview Features
+| Extension | Filetype |
+|-----------|----------|
+| `.mmd` | `mermaid` |
+| `.mermaid` | `mermaid` |
 
-The live preview window includes a floating toolbar with:
+---
 
-- **Connect Stability**: Automatic SSE reconnection and optimized CDN loading (via `esm.sh`) for a smooth experience.
-- **Zoom In/Out/Reset**: Navigate complex diagrams easily.
-- **Copy Image**: Renders a high-resolution PNG (3x scale) and copies it to your clipboard.
-- **Download SVG**: Save the vector diagram locally.
+## ❓ FAQ
 
-## ❤️ Credits & Contributors
+**Q: The preview opens but shows "Loading..."**
+A: Make sure you have content in your buffer and the SSE connection is established. Check the connection status indicator (top-right of the preview page).
 
-- [mermaid.js](https://mermaid.js.org/)
-- [beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid)
-- [svg-pan-zoom](https://github.com/bumbu/svg-pan-zoom)
+**Q: `:MermaidFormat` broke my diagram**
+A: Add `-- mermaid-format-ignore` at the end of lines you want to skip. File a bug report with the Mermaid code if it's a genuine formatting error.
 
-### Special Thanks
-- **Gemini (Google DeepMind)**: Served as a core collaborator for refactoring the preview system, and enhancing SSE connection stability.
+**Q: How do I use `mermaid-cli` for diagnostics?**
+A: Install it globally: `npm install -g @mermaid-js/mermaid-cli`. The plugin auto-detects the `mmdc` binary.
+
+**Q: Can I use this without a browser?**
+A: Yes! Use `:MermaidRender` with Kitty terminal or `chafa` installed for inline rendering.
+
+**Q: The preview page is white in dark mode**
+A: The plugin auto-detects your Neovim `background` setting. Run `:set background=dark` and the preview will sync. If it doesn't, restart the preview with `:MermaidPreviewStop` then `:MermaidPreview`.
+
+**Q: Does this work on Windows?**
+A: The plugin is Lua-based so it runs anywhere Neovim runs. The built-in server uses `vim.loop` which is cross-platform.
+
+---
+
+## 🔧 Troubleshooting
+
+### Preview not opening
+- **Check the server**: `:lua print(require("mermaid.server").port)`
+- **Manual open**: Navigate to `http://localhost:<port>` in your browser
+- **Check logs**: `:messages` for Mermaid-related notifications
+
+### Formatting issues
+- **Wrong indentation**: Adjust `shift_width` in config
+- **Broken syntax**: Use `-- mermaid-format-ignore` on problem lines
+- **Missing diagram type**: Some block structures may need a custom pattern — open an issue
+
+### Inline rendering not working
+- **Terminal detection**: `:lua print(require("mermaid.render").detect_capability())`
+- **Kitty**: Ensure `kitty +kitten icat` works: `echo test | kitty +kitten icat`
+- **chafa**: `chafa --version` should print a version ≥ 0.8
+
+### Diagnostics not showing errors
+- **Ensure mmdc is installed**: `which mmdc`
+- **Test manually**: `echo "graph TD\nA-->B" | mmdc -i - -o /tmp/test.svg`
+- **Check config**: `lint.enabled` must be `true` in setup
+
+---
 
 ## 🤝 Contributing
 
-Pull requests are welcome! Please feel free to open an issue for bugs or feature requests.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Project structure overview
+- Development setup (`make test`)
+- Code style guide
+- Commit conventions (Conventional Commits)
+
+---
+
+## 🗺️ Roadmap
+
+- [x] Live preview with SSE
+- [x] Built-in Lua HTTP server
+- [x] Dual renderers (mermaid.js + beautiful-mermaid)
+- [x] Auto-formatting
+- [x] Lint via diagnostics
+- [x] CI/CD (GitHub Actions)
+- [x] Dark mode adaptive preview
+- [x] Floating panel in-editor
+- [x] Terminal inline rendering
+- [ ] Split-window preview mode
+- [ ] SVG export with custom dimensions
+- [ ] Snippet support for Mermaid diagrams
+- [ ] Obsidian-style diagram embedding
+
+---
+
+## ❤️ Credits
+
+- [mermaid.js](https://mermaid.js.org/) — Diagram rendering engine
+- [beautiful-mermaid](https://github.com/lukilabs/beautiful-mermaid) — Aesthetic renderer
+- [svg-pan-zoom](https://github.com/bumbu/svg-pan-zoom) — Interactive zoom/pan
 
 ## 📄 License
 
-MIT
+MIT — see [LICENSE](LICENSE)
