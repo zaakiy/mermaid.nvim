@@ -56,6 +56,7 @@ function M.capability_label(cap)
 end
 
 --- Generate SVG using mmdc from Mermaid source text.
+--- Theme is derived from Neovim's background setting for terminal render.
 --- Returns { ok = true, svg_path = "..." } or { ok = false, error = "..." }
 function M.generate_svg(content, output_path)
   output_path = output_path or os.tmpname() .. ".svg"
@@ -64,6 +65,9 @@ function M.generate_svg(content, output_path)
   if vim.fn.executable(cmd) == 0 then
     return { ok = false, error = "mmdc not found. Install @mermaid-js/mermaid-cli." }
   end
+
+  -- Map Neovim background to mermaid theme: dark → "dark", light → "default"
+  local mmdc_theme = vim.o.background == "dark" and "dark" or "default"
 
   local tmp_input = os.tmpname() .. ".mmd"
   local input_f = io.open(tmp_input, "w")
@@ -74,7 +78,7 @@ function M.generate_svg(content, output_path)
     return { ok = false, error = "Failed to write temp file" }
   end
 
-  local result = vim.fn.system({ cmd, "-i", tmp_input, "-o", output_path })
+  local result = vim.fn.system({ cmd, "-i", tmp_input, "-o", output_path, "--theme", mmdc_theme })
   local exit_code = vim.v.shell_error
 
   pcall(os.remove, tmp_input)
