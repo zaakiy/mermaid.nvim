@@ -11,5 +11,7 @@ end
 
 ensure_plenary()
 
-require("mermaid").setup({})
+vim.o.expandtab = true
+
+require("mermaid").setup({ format = { shift_width = 2 } })
 require("plenary.busted") -- Ensure plenary is loaded
