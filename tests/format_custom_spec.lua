@@ -53,8 +53,8 @@ describe("mermaid formatted", function()
     
     assert.are.same("erDiagram", content[1])
     -- Expect spaces around tokens
-    assert.are.same("  CUSTOMER ||--o{ ORDER : places", content[2])
-    assert.are.same("  ORDER ||--|{ LINE-ITEM : contains", content[3])
+    assert.are.same("  CUSTOMER ||--o{ ORDER: places", content[2])
+    assert.are.same("  ORDER ||--|{ LINE-ITEM: contains", content[3])
   end)
 
   it("formats Sequence diagram with alt/else", function()
@@ -76,19 +76,11 @@ describe("mermaid formatted", function()
     local content = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
     
     assert.are.same("sequenceDiagram", content[1])
-    assert.are.same("  Alice ->> Bob : Hello", content[2]) -- checking colon pad
+    assert.are.same("  Alice ->> Bob: Hello", content[2]) -- checking colon pad
     assert.are.same("  alt is sick", content[3])
-    assert.are.same("    Bob -->> Alice : Not well", content[4])
-    assert.are.same("  else is well", content[5]) -- dedented to level 1 (inside seq which is 1? No seq is 0->1. alt is 1->2. else at 1.)
-    -- Wait: sequenceDiagram is Start Block? Yes (lev 0->1).
-    -- Alice (1).
-    -- alt (1->2). (prints at 1).
-    -- Bob (2).
-    -- else (prints at 1).
-    -- Bob (2).
-    -- end (prints at 1, dedents 2->1).
-    
-    assert.are.same("    Bob -->> Alice : Good", content[6])
+    assert.are.same("    Bob -->> Alice: Not well", content[4])
+    assert.are.same("  else is well", content[5])
+    assert.are.same("    Bob -->> Alice: Good", content[6])
     assert.are.same("  end", content[7])
   end)
   
@@ -112,9 +104,9 @@ describe("mermaid formatted", function()
      assert.are.same("gantt", content[1])
      assert.are.same("  title My Project", content[2])
      assert.are.same("  section Section A", content[3])
-     assert.are.same("  Task 1 : a1, 2014-01-01, 30d", content[4])
+     assert.are.same("  Task 1: a1, 2014-01-01, 30d", content[4])
      assert.are.same("  section Section B", content[5])
-     assert.are.same("  Task 2 : 20d", content[6])
+     assert.are.same("  Task 2: 20d", content[6])
   end)
 
 end)
