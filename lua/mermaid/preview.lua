@@ -26,11 +26,11 @@ function M.preview()
   end
 
   update_content()
-  
+
   -- Setup autocmd to update content
   local bufnr = vim.api.nvim_get_current_buf()
   local group = vim.api.nvim_create_augroup("MermaidLivePreview-" .. bufnr, { clear = true })
-  
+
   vim.api.nvim_create_autocmd({"TextChanged", "TextChangedI", "BufWritePost"}, {
       group = group,
       buffer = bufnr,
@@ -38,7 +38,7 @@ function M.preview()
           update_content()
       end
   })
-  
+
   local url = "http://localhost:" .. port
   vim.notify("Mermaid: Live Preview at " .. url, vim.log.levels.INFO)
 

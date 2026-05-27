@@ -138,14 +138,14 @@ function M.do_lint_async(bufnr)
   handle = uv.spawn(cmd, {
     args = { "-i", "-", "-o", tmpfile },
     stdio = { stdin, stdout, stderr }
-  }, function(code, signal)
+  }, function(code, _signal)
     exit_code = code
     if handle and not handle:is_closing() then handle:close() end
     on_finish()
   end)
 
   -- Read stderr
-  uv.read_start(stderr, function(err, data)
+  uv.read_start(stderr, function(_err, data)
     if data then
       stderr_data = stderr_data .. data
     else
@@ -156,7 +156,7 @@ function M.do_lint_async(bufnr)
   end)
 
   -- Read stdout (just to drain, not used for diagnostics)
-  uv.read_start(stdout, function(err, data)
+  uv.read_start(stdout, function(_err, data)
     if data then
       stdout_data = stdout_data .. data
     else

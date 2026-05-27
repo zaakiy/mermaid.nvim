@@ -71,12 +71,18 @@ local function send_error(client, status, message, content_type)
   client:write(response, function() client:close() end)
 end
 
+--- Return the plugin root directory
+local function get_plugin_root()
+  local script_path = debug.getinfo(1, "S").source:sub(2)
+  return vim.fn.fnamemodify(script_path, ":h:h:h")
+end
+
 --------------------------------------------------------------------
 -- Route Handlers
 --------------------------------------------------------------------
 
 --- Handle the SSE event stream endpoint
-local function handle_sse(client, req)
+local function handle_sse(client, _req)
   -- Must schedule for vim.fn.json_encode
   vim.schedule(function()
     local headers = "HTTP/1.1 200 OK\r\n" ..
@@ -104,7 +110,7 @@ local function handle_sse(client, req)
 end
 
 --- Handle the index page and /content fallback
-local function handle_root(client, req, path)
+local function handle_root(client, _req, path)
   if path == "/" or path == "/index.html" then
     local html = M.get_html_template()
     if html then
@@ -124,7 +130,7 @@ local function handle_root(client, req, path)
 end
 
 --- Handle static file requests (CSS, JS, etc.)
-local function handle_static(client, req, path)
+local function handle_static(client, _req, path)
   local filename = path:sub(2) -- strip leading /
   if filename == "" then filename = "index.html" end
 
@@ -134,7 +140,7 @@ local function handle_static(client, req, path)
     return
   end
 
-  local f, err = io.open(get_plugin_root() .. "/static/" .. filename, "rb")
+  local f = io.open(get_plugin_root() .. "/static/" .. filename, "rb")
   if not f then
     send_error(client, 404, "Not Found")
     return
@@ -150,12 +156,6 @@ local function handle_static(client, req, path)
   client:write(build_response(200, body, content_type), function()
     client:close()
   end)
-end
-
---- Return the plugin root directory
-function get_plugin_root()
-  local script_path = debug.getinfo(1, "S").source:sub(2)
-  return vim.fn.fnamemodify(script_path, ":h:h:h")
 end
 
 --------------------------------------------------------------------

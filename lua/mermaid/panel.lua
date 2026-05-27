@@ -59,7 +59,7 @@ local function refresh()
 end
 
 --- Create the floating window
-function M.open(url)
+function M.open(_url)
   -- Close existing panel first
   M.close()
 

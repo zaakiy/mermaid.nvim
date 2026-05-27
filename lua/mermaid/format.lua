@@ -60,7 +60,7 @@ end
 --- Pad Mermaid tokens with surrounding spaces
 local function pad_mermaid_tokens(line)
   local tokens = {}
-  local function stash(pre, match, post)
+  local function stash(_, match, _post)
     table.insert(tokens, match)
     return "\001" .. #tokens .. "\001"
   end
@@ -221,27 +221,6 @@ local function is_self_closing(line)
   return false
 end
 
---- Count braces in a line for nesting depth tracking
-local function count_toplevel_braces(line, after_block_keyword)
-  -- Only count braces when they represent block structure,
-  -- not when inside a class/state definition
-  if after_block_keyword then
-    -- e.g. "class Animal {" - this is a start, count nothing yet
-    return 0, 0
-  end
-
-  local open_count = 0
-  local close_count = 0
-  -- Simple brace counting - only for structural braces on their own
-  if line:match("{$") or line:match("%%{$") then
-    open_count = 1
-  end
-  if line:match("^}") or line:match("}%%$") then
-    close_count = 1
-  end
-  return open_count, close_count
-end
-
 ------------------------------------------------------------------------------
 -- Public API
 ------------------------------------------------------------------------------
@@ -282,9 +261,7 @@ function M.format()
 
       local current_adjust = 0
 
-      if is_self_closing(masked_line) then
-        -- No indent change for self-closing lines
-      else
+      if not is_self_closing(masked_line) then
         if is_end_block(masked_line) then
           indent_level = math.max(0, indent_level - 1)
         elseif is_mid_block(masked_line) then

@@ -14,8 +14,6 @@
 --   5. Fallback to "none" (URL-only)
 local M = {}
 
-local uv = vim.loop
-
 --- Detect what terminal rendering capability is available
 function M.detect_capability()
   local env = vim.fn.environ()
