@@ -4,9 +4,13 @@ let panZoomInstance = null;
 let panState = null;
 let pendingContent = null;
 
-export function initPreview(renderer, theme) {
+export function initPreview(renderer, theme, themeMode) {
     window.RENDERER = renderer;
     window.THEME = theme;
+    window.THEME_MODE = themeMode || 'light';
+
+    // Apply theme-mode CSS class for styling
+    document.body.dataset.theme = window.THEME_MODE;
 
     // --- Button Logic ---
 

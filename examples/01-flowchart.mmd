@@ -1,0 +1,12 @@
+---
+This example demonstrates the most common Mermaid diagram types.
+Use this file to test the formatter and preview features.
+---
+
+flowchart TD
+    A(Start) --> B{It's a mermaid.nvim?}
+    B -- Yes --> C[You're in the right place! 🧜]
+    B -- No --> D[Install mermaid.nvim]
+    C --> E[Run :MermaidPreview]
+    D --> E
+    E --> F[🎉 Enjoy!]

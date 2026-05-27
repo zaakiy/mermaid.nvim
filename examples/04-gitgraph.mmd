@@ -1,0 +1,21 @@
+gitGraph
+    commit id: "Initial commit"
+    branch develop
+    checkout develop
+    commit id: "SSE streaming"
+    commit id: "Format engine"
+    checkout main
+    merge develop tag: "v0.1"
+    branch feature/preview
+    checkout feature/preview
+    commit id: "Live preview"
+    commit id: "Dark mode"
+    checkout develop
+    merge feature/preview tag: "v0.2"
+    branch feature/inline
+    checkout feature/inline
+    commit id: "Terminal render"
+    checkout develop
+    merge feature/inline tag: "v0.3"
+    checkout main
+    merge develop tag: "v1.0"

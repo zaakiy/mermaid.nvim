@@ -9,7 +9,7 @@
   {{SCRIPTS}}
 </head>
 
-<body>
+<body data-theme="{{THEME_MODE}}">
   <div id="toolbar">
     <button id="btn-zoom-in" title="Zoom In">
       <svg viewBox="0 0 24 24" fill="currentColor">
@@ -45,11 +45,22 @@
   </div>
   <div class="mermaid" id="graph-container"></div>
   <div id="error-container"></div>
+  <div id="connection-status"></div>
 
   <script type="module">
-    // Connect to SSE immediately to prevent server timeout
-    const evtSource = new EventSource("/events");
+// --- SSE with exponential backoff ---
+let evtSource = null;
+let sseRetryCount = 0;
+let sseConnected = false;
+
+function connectSSE() {
+    evtSource = new EventSource("/events");
+
     evtSource.onmessage = function (event) {
+        // Reset retry count on successful message
+        sseRetryCount = 0;
+        sseConnected = true;
+        updateConnectionStatus('connected');
         try {
             const content = JSON.parse(event.data);
             if (window.renderGraph) {
@@ -59,14 +70,59 @@
             }
         } catch (e) {
             console.error("Parse error", e);
+            showError("Parse error: " + e.message);
         }
     };
+
     evtSource.onerror = function (err) {
-        console.error("EventSource failed:", err);
+        sseRetryCount++;
+        const backoff = Math.min(1000 * Math.pow(2, sseRetryCount), 30000);
+        console.warn(`SSE error (attempt ${sseRetryCount}), reconnecting in ${backoff}ms...`);
+        updateConnectionStatus('reconnecting', backoff, sseRetryCount);
+
+        // Close and reconnect with exponential backoff
+        evtSource.close();
+        setTimeout(() => connectSSE(), backoff);
     };
 
+    evtSource.onopen = function () {
+        sseRetryCount = 0;
+        sseConnected = true;
+        updateConnectionStatus('connected');
+    };
+}
+
+function updateConnectionStatus(state, delay, attempt) {
+    const el = document.getElementById('connection-status');
+    if (!el) return;
+
+    if (state === 'connected') {
+        el.textContent = '● Connected';
+        el.style.color = '#4ade80';
+        el.style.display = 'block';
+    } else if (state === 'reconnecting') {
+        el.textContent = `◌ Reconnecting (${delay}ms, attempt ${attempt})`;
+        el.style.color = '#fbbf24';
+        el.style.display = 'block';
+    } else if (state === 'disconnected') {
+        el.textContent = '○ Disconnected';
+        el.style.color = '#f87171';
+        el.style.display = 'block';
+    }
+}
+
+function showError(msg) {
+    const el = document.getElementById('error-container');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+// Start SSE connection
+connectSSE();
+
     import { initPreview } from '/js/preview.js';
-    initPreview("{{RENDERER}}", "{{THEME}}");
+    initPreview("{{RENDERER}}", "{{THEME}}", "{{THEME_MODE}}");
   </script>
 </body>
 

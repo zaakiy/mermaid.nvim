@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Luacheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lunarmodules/luacheck@v1
+        with:
+          args: lua tests --no-color --ignore 631
+
+  test:
+    name: Test (Neovim ${{ matrix.nvim_version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        nvim_version: [v0.9.5, v0.10.0, v0.11.0, stable, nightly]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.nvim_version }}
+
+      - name: Install plenary.nvim
+        run: |
+          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim /tmp/plenary.nvim
+
+      - name: Run tests
+        run: |
+          nvim --headless -u tests/minimal_init.lua \
+            -c "PlenaryBustedDirectory tests/ { minimal_init = 'tests/minimal_init.lua' }"
+
+  release:
+    name: Release (tag push only)
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

@@ -30,16 +30,31 @@ Or with options:
 
 ==============================================================================
 3. COMMANDS                                                 *mermaid-commands*
-
+~
 :MermaidFormat                                                *MermaidFormat*
     Formats the current buffer using the built-in Mermaid formatter.
     Features:
-    - Normalizes indentation (2 spaces by default)
+    - Normalizes indentation (4 spaces by default, configurable via `shift_width`)
     - Pads tokens like arrows and relationships
-    - Handled indentation for subgraphs, classes, etc.
+    - Handles indentation for subgraphs, classes, alt/else blocks, and more
 
 :MermaidPreview                                              *MermaidPreview*
-    Generate a live preview of the current diagram (implementation dependent).
+    Open a live preview in your browser at localhost. Updates in real time
+    via SSE as you edit the buffer. Includes a floating toolbar with zoom,
+    copy-to-clipboard (PNG), and SVG download.
+
+:MermaidPreviewStop                                          *MermaidPreviewStop*
+    Manually stop the preview server and close associated connections.
+
+:MermaidCopyURL                                              *MermaidCopyURL*
+    Copy the preview URL to the system clipboard. Useful for sharing
+    or opening in a different browser.
+
+:MermaidRender                                               *MermaidRender*
+    Render the current diagram inline in the terminal. Requires either
+    `mmdc` (mermaid-cli) with a supported renderer (Kitty protocol,
+    chafa, etc.). If no inline renderer is detected, shows a fallback
+    message suggesting :MermaidPreview.
 
 ==============================================================================
 4. MAPPINGS                                                 *mermaid-mappings*

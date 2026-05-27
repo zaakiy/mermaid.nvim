@@ -14,4 +14,5 @@ ensure_plenary()
 vim.o.expandtab = true
 
 require("mermaid").setup({ format = { shift_width = 2 } })
+require("mermaid.server")._test_mode = true  -- Skip idle monitor in tests
 require("plenary.busted") -- Ensure plenary is loaded
