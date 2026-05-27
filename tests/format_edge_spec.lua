@@ -164,10 +164,10 @@ describe("mermaid format — edge cases v2", function()
         "Alice->>Bob: Hello: How are you?",
       })
       assert.are.same("sequenceDiagram", result[1])
-      -- Every `:` gets padded. This is a known limitation:
+      -- Every `:` now sits tight to the left word. This is a known limitation:
       -- the formatter doesn't distinguish structural `:` (label separator)
       -- from content `:` inside the message text.
-      assert.are.same("  Alice ->> Bob : Hello : How are you?", result[2])
+      assert.are.same("  Alice ->> Bob: Hello: How are you?", result[2])
     end)
   end)
 
