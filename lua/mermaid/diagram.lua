@@ -1,45 +1,63 @@
 local M = {}
 
---- Extract mermaid diagram from ```mermaid ... ``` fenced code blocks.
+--- Extract mermaid diagram content from fenced code blocks.
+--- Returns only the diagram content (excluding fence markers).
 --- If no fences found, returns original content (for pure mermaid files).
 function M.extract(content)
-    local fence_start = content:find("```mermaid", 1, true)
+    -- Find opening fence: ```mermaid (or ```flowchart, etc.)
+    local fence_start = content:find("```", 1, true)
     if not fence_start then
         return content
     end
 
-    -- Find the closing fence: ``` at start of a new line
+    -- Get the fence type (e.g., "mermaid", "flowchart") between fences
+    local fence_type_end = content:find("\n", fence_start)
+    if not fence_type_end then
+        return content
+    end
+    local fence_type = content:sub(fence_start + 3, fence_type_end - 1):gsub("^%s+", "")
+    
+    -- Only process if the content looks like a mermaid fence
+    -- Accept "mermaid" or any known mermaid diagram type keyword
+    local is_mermaid_fence = fence_type == "mermaid" or fence_type:match("^[a-z]")
+    
+    local content_start = fence_type_end + 1
+
+    -- Find closing fence: ``` on its own line (possibly with trailing whitespace)
     local end_pos = 0
-    local search_from = fence_start + 10
+    local search_from = content_start
 
     while true do
-        local pos = content:find("\n```", search_from)
-        if not pos then break end
-
-        -- Verify this ``` is at the start of a line
-        local before = pos > 1 and content:sub(pos - 1, pos - 1) or ""
-        if before == "\n" or before == "\r" then
-            -- Check it's actually the start of a line
-            local line_start = pos
-            while line_start > 1 and content:sub(line_start - 1, line_start - 1) ~= "\n" do
-                line_start = line_start - 1
-            end
-            -- Check there's no content before the ``` on this line (only whitespace)
-            local line_before = content:sub(line_start, pos - 1)
-            if line_before:match("^%s*$") then
-                end_pos = pos + 3
+        local rest = content:sub(search_from)
+        local newline = rest:find("\n")
+        if not newline then break end
+        local line_start = search_from + newline - 1
+        -- Check if this line starts with ```
+        local fence_candidate = content:sub(line_start, line_start + 2)
+        if fence_candidate == "```" then
+            local after_fence = content:sub(line_start + 3, line_start + 10)
+            if after_fence == "" or after_fence:match("^[%s\r\n]*$") then
+                end_pos = line_start
                 break
             end
         end
-        search_from = pos + 1
+        search_from = line_start + 1
     end
 
+    local content_end
     if end_pos == 0 then
-        -- No closing fence found; return from fence_start to end
-        return content:sub(fence_start)
+        -- No closing fence found; return from content_start to end, trim trailing whitespace
+        content_end = #content
+    else
+        content_end = end_pos - 1
     end
 
-    return content:sub(fence_start, end_pos)
+    -- Strip trailing whitespace/newlines at end
+    while content_end >= content_start and content:sub(content_end, content_end):match("[%s\n\r]") do
+        content_end = content_end - 1
+    end
+
+    return content:sub(content_start, content_end)
 end
 
 return M
