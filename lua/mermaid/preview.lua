@@ -10,7 +10,9 @@ local function detect_theme_mode()
 end
 
 local function update_content()
-    local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    local content = table.concat(lines, "\n")
+    content = require("mermaid.diagram").extract(content)
     server.set_content(content)
 end
 
