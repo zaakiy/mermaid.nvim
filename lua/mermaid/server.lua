@@ -199,8 +199,15 @@ end
 function M.start_server()
   if M.server then return M.port end
 
+  local config_port = require("mermaid").config.preview.port or 0
+
   M.server = uv.new_tcp()
-  M.server:bind("127.0.0.1", 0)
+  local bind_err = M.server:bind("127.0.0.1", config_port)
+  if bind_err then
+    M.server:close()
+    M.server = nil
+    return nil, bind_err
+  end
 
   local addr = M.server:getsockname()
   M.port = addr.port
