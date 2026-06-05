@@ -203,7 +203,7 @@ function M.start_server()
 
   M.server = uv.new_tcp()
   local bind_err = M.server:bind("127.0.0.1", config_port)
-  if bind_err ~= nil then
+  if type(bind_err) == "string" then
     M.server:close()
     M.server = nil
     return nil, bind_err
