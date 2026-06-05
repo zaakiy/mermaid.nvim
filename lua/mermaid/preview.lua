@@ -19,10 +19,22 @@ function M.preview()
   server.set_theme_mode(detect_theme_mode())
 
   -- Start server if not running
-  local port = server.start_server()
+  local mermaid_config = require("mermaid")
+  local port, bind_err = server.start_server()
   if not port then
-      vim.notify("Mermaid: Failed to start server", vim.log.levels.ERROR)
-      return
+      if bind_err then
+          vim.notify("Mermaid: Failed to bind to port " .. mermaid_config.config.preview.port .. " (" .. bind_err .. "). Falling back to auto-assigned port.", vim.log.levels.WARN)
+          server.stop_server()
+          mermaid_config.config.preview.port = 0
+          port, bind_err = server.start_server()
+          if not port then
+              vim.notify("Mermaid: Failed to start server: " .. (bind_err or "unknown error"), vim.log.levels.ERROR)
+              return
+          end
+      else
+          vim.notify("Mermaid: Failed to start server: no port available", vim.log.levels.ERROR)
+          return
+      end
   end
 
   update_content()
